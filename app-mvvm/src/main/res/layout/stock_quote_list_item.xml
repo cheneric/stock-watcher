@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<data>
+		<import type="android.text.TextUtils"/>
+		<import type="android.view.View"/>
+		<variable name="viewModel" type="cheneric.stockwatcher.viewmodel.StockQuoteListItemViewModel"/>
+	</data>
+
+	<LinearLayout
+		android:id="@+id/list_item"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="@dimen/stock_item_vertical_margin"
+		android:paddingBottom="@dimen/stock_item_vertical_margin"
+		android:paddingStart="@dimen/text_margin"
+		android:paddingLeft="@dimen/text_margin"
+		android:paddingEnd="@dimen/text_margin"
+		android:paddingRight="@dimen/text_margin"
+		android:orientation="horizontal"
+		android:background="?android:attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:onClick="@{viewModel::onItemSelected}">
+
+		<TextView
+			android:layout_width="0px"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textAppearance="?attr/textAppearanceListItem"
+			android:text="@{viewModel.symbol}"
+			tools:text="GOOGL"/>
+
+		<ProgressBar
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:visibility="@{TextUtils.isEmpty(viewModel.price) ? View.VISIBLE : View.GONE}"
+			style="?android:attr/progressBarStyleSmall"
+			tools:visibility="gone"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:visibility="@{viewModel.price == null ? View.GONE : View.VISIBLE}"
+			android:textAppearance="?attr/textAppearanceListItem"
+			android:text='@{TextUtils.isEmpty(viewModel.price) ? "" : "$" + viewModel.price}'
+			app:textColorDiscriminator="@{viewModel.isPriceGain}"
+			tools:text="$123.45"
+			tools:visibility="visible"/>
+
+	</LinearLayout>
+
+</layout>

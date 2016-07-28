@@ -1,0 +1,76 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		// 'apt' scope - compile scope without exporting dependency
+		classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+		// Java 8
+		classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+	}
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'me.tatarka.retrolambda'
+
+android {
+	final int TARGET_ANDROID_SDK_VERSION = 24;
+	compileSdkVersion TARGET_ANDROID_SDK_VERSION
+	buildToolsVersion '24.0.1'
+
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+
+	dataBinding {
+		enabled = true
+	}
+
+	defaultConfig {
+		applicationId 'cheneric.stockwatcher'
+		minSdkVersion 15
+		targetSdkVersion TARGET_ANDROID_SDK_VERSION
+		versionCode 1
+		versionName '1.0.0'
+	}
+
+	buildTypes {
+		release {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/main/proguard/proguard.pro'
+		}
+	}
+
+	dependencies {
+		final String ANDROID_SUPPORT_VERSION = '24.1.1'
+		final String BUTTERKNIFE_VERSION = '8.2.1'
+		final String DAGGER_VERSION = '2.5'
+		final String LOMBOK = 'org.projectlombok:lombok:1.16.10'
+		final String RETROFIT_VERSION = '2.1.0'
+		apt "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
+		apt "com.jakewharton:butterknife-compiler:${BUTTERKNIFE_VERSION}"
+		apt LOMBOK
+
+		compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+		compile "com.android.support:design:${ANDROID_SUPPORT_VERSION}"
+		compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+		compile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+		compile('com.google.auto.factory:auto-factory:1.0-beta3') {
+			// exclude guava:18.0
+			exclude group: 'com.google.guava', module: 'guava'
+		}
+		compile "com.google.dagger:dagger:${DAGGER_VERSION}"
+		compile "com.jakewharton:butterknife:${BUTTERKNIFE_VERSION}"
+		compile 'com.jakewharton.timber:timber:4.1.2'
+		compile 'com.squareup.okhttp3:logging-interceptor:3.3.1'
+		compile "com.squareup.retrofit2:retrofit:${RETROFIT_VERSION}"
+		compile "com.squareup.retrofit2:converter-gson:${RETROFIT_VERSION}"
+		compile 'io.reactivex:rxandroid:1.2.1'
+		compile 'io.reactivex:rxjava:1.1.6'
+		provided 'com.google.guava:guava:19.0'
+		provided LOMBOK
+		testCompile 'junit:junit:4.12'
+	}
+}

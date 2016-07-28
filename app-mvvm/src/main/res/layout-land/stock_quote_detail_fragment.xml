@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	tools:context=".view.StockQuoteDetailFragment">
+
+	<data>
+		<import type="android.view.View"/>
+		<variable name="viewModel" type="cheneric.stockwatcher.viewmodel.StockQuoteDetailViewModel"/>
+	</data>
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<FrameLayout android:layout_width="0px"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:paddingEnd="30dp"
+				android:paddingRight="30dp">
+
+				<TextView
+					android:layout_gravity="end|right"
+					android:text="@{viewModel.symbol}"
+					app:backgroundTintDiscriminator="@{viewModel.isPriceGain}"
+					style="@style/TickerSymbol"
+					tools:backgroundTint="@color/green"
+					tools:text="GOOGL"/>
+
+			</FrameLayout>
+
+			<FrameLayout android:layout_width="0px"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:paddingStart="30dp"
+				android:paddingLeft="30dp">
+
+				<ProgressBar
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="20dp"
+					android:layout_marginLeft="20dp"
+					android:visibility="@{viewModel.isPriceGain == null ? View.VISIBLE: View.GONE}"
+					style="?android:attr/progressBarStyleLarge"
+					tools:visibility="gone"/>
+
+				<LinearLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:visibility="@{viewModel.isPriceGain == null ? View.GONE: View.VISIBLE}"
+					tools:visibility="visible">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textAppearance="@style/Title3"
+						android:text="@{viewModel.name}"
+						tools:text="Google"/>
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:textAppearance="@style/Title3"
+						android:text='@{@string/quote_detail_last_price(viewModel.price)}'
+						tools:text="Last traded at $123.45"/>
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:textAppearance="@style/Title3"
+						android:text='@{@string/quote_detail_change_amount(viewModel.changePercent ?? "%")}'
+						app:textSpanColorDiscriminator="@{viewModel.isPriceGain}"
+						tools:text="Changed by 1.23% today"/>
+
+				</LinearLayout>
+
+			</FrameLayout>
+
+		</LinearLayout>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom|end|right"
+			android:layout_marginEnd="@dimen/text_margin"
+			android:layout_marginRight="@dimen/text_margin"
+			android:layout_marginBottom="@dimen/text_margin"
+			android:textAppearance="@style/Subtext"
+			android:text="@{@string/quote_detail_pagination(viewModel.itemIndex + 1, viewModel.stockListSize)}"
+			tools:text="1/100"/>
+
+	</FrameLayout>
+
+</layout>

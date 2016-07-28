@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	tools:context=".view.StockQuoteListFragment">
+
+	<data>
+		<variable name="viewModel" type="cheneric.stockwatcher.viewmodel.StockQuoteListViewModel"/>
+	</data>
+
+	<FrameLayout android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<android.support.v7.widget.RecyclerView
+			android:id="@+id/list"
+			android:name="cheneric.stockwatcher.view.StockListFragment"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:layoutManager="LinearLayoutManager"
+			tools:listitem="@layout/stock_quote_list_item"/>
+
+		<android.support.design.widget.FloatingActionButton
+			android:id="@+id/add"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom|end|right"
+			android:layout_marginBottom="@dimen/activity_horizontal_margin"
+			android:layout_marginEnd="@dimen/activity_horizontal_margin"
+			android:layout_marginRight="@dimen/activity_horizontal_margin"
+			android:src="@drawable/ic_add_white_24dp"
+			android:onClick="@{viewModel::onAddClick}"
+			app:fabSize="auto"
+			app:elevation="@dimen/fab_elevation"/>
+
+	</FrameLayout>
+
+</layout>
