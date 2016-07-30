@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.auto.factory.AutoFactory;
+import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
 
 import javax.inject.Inject;
 
@@ -85,6 +86,7 @@ public class StockQuoteListFragment extends Fragment {
 		binding.setViewModel(new StockQuoteListViewModel(this));
 		final View rootView = binding.getRoot();
 		final RecyclerView recyclerView = this.recyclerView = (RecyclerView)rootView.findViewById(R.id.list);
+		((RecyclerFastScroller)rootView.findViewById(R.id.fast_scroller)).attachRecyclerView(recyclerView);
 		final Context context = recyclerView.getContext();
 		if (columnCount <= 1) {
 			layoutManager = new LinearLayoutManager(context);

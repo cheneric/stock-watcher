@@ -19,6 +19,12 @@
 			app:layoutManager="LinearLayoutManager"
 			tools:listitem="@layout/stock_quote_list_item"/>
 
+		<com.pluscubed.recyclerfastscroll.RecyclerFastScroller
+			android:id="@+id/fast_scroller"
+			android:layout_width="wrap_content"
+			android:layout_height="match_parent"
+			android:layout_gravity="end|right" />
+
 		<android.support.design.widget.FloatingActionButton
 			android:id="@+id/add"
 			android:layout_width="wrap_content"

@@ -57,6 +57,7 @@ android {
 		compile "com.android.support:design:${ANDROID_SUPPORT_VERSION}"
 		compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
 		compile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+		compile 'com.github.pluscubed:recycler-fast-scroll:0.3.2'
 		compile('com.google.auto.factory:auto-factory:1.0-beta3') {
 			// exclude guava:18.0
 			exclude group: 'com.google.guava', module: 'guava'
@@ -72,5 +73,9 @@ android {
 		provided 'com.google.guava:guava:19.0'
 		provided LOMBOK
 		testCompile 'junit:junit:4.12'
+	}
+
+	repositories {
+		maven { url "https://jitpack.io" }
 	}
 }

@@ -94,7 +94,12 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	}
 
 	void update(StockQuote stockQuote) {
-		Timber.d("updating stock detail list item (%s): %s", itemIndex, stockQuote);
+		if (stockQuote == null) {
+			Timber.d("recycling stock detail list item (%s)", itemIndex);
+		}
+		else {
+			Timber.d("updating stock detail list item (%s): %s", itemIndex, stockQuote);
+		}
 		setPrice(stockQuote == null ? null : stockQuote.getPrice());
 		setIsPriceGain(stockQuote == null ? null : stockQuote.isPriceGain());
 	}
