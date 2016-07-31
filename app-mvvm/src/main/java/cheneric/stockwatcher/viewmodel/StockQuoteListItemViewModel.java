@@ -19,6 +19,7 @@ import timber.log.Timber;
 
 @AutoFactory
 public class StockQuoteListItemViewModel extends BaseObservable {
+	private static final long REFRESH_MILLIS = 2000;
 
 	// observed
 	private Boolean isPriceGain;
@@ -28,13 +29,15 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	// unobserved
 	@Setter
 	private int itemIndex = -1;
+	private View rootView;
 	private Subscription subscription;
 
 	private final StockQuoteProvider stockQuoteProvider;
 	private final StockQuoteListFragment.ItemSelectedListener itemSelectedListener;
 
-	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, String symbol, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
+	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, String symbol, View rootView, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 		this.stockQuoteProvider = stockQuoteProvider;
+		this.rootView = rootView;
 		this.itemSelectedListener = itemSelectedListener;
 		update(itemIndex, symbol);
 	}
@@ -104,6 +107,17 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 		}
 		setPrice(stockQuote == null ? null : stockQuote.getPrice());
 		setIsPriceGain(stockQuote == null ? null : stockQuote.isPriceGain());
+		autoRefresh();
+	}
+
+	void autoRefresh() {
+		rootView.postDelayed(() -> {
+			final String symbol = this.symbol;
+			if (rootView.isShown() && symbol != null) {
+				stockQuoteProvider.updateStockQuote(symbol);
+			}
+		},
+		REFRESH_MILLIS);
 	}
 
 	public void onItemSelected(View view) {

@@ -61,7 +61,8 @@ public class StockQuoteDetailFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final StockQuoteDetailFragmentBinding binding = StockQuoteDetailFragmentBinding.inflate(inflater);
-		binding.setViewModel(stockQuoteDetailViewModelFactory.create(itemIndex, stockListSize, symbol));
-		return binding.getRoot();
+		final View rootView = binding.getRoot();
+		binding.setViewModel(stockQuoteDetailViewModelFactory.create(itemIndex, stockListSize, symbol, rootView));
+		return rootView;
 	}
 }

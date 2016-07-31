@@ -65,10 +65,10 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 		StockQuoteListItemViewModelFactory viewModelFactory;
 
 		public ViewHolder(StockQuoteListItemBinding binding) {
-			super(binding.listItem);
+			super(binding.getRoot());
 			this.binding = binding;
 			// inject
-			((StockWatcherApplication)binding.listItem
+			((StockWatcherApplication)binding.getRoot()
 				.getContext()
 					.getApplicationContext())
 						.getComponentManager()
@@ -79,7 +79,7 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 		void bind(int itemIndex, String symbol, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 			final StockQuoteListItemViewModel viewModel = binding.getViewModel();
 			if (viewModel == null) {
-				binding.setViewModel(viewModelFactory.create(itemIndex, symbol, itemSelectedListener));
+				binding.setViewModel(viewModelFactory.create(itemIndex, symbol, binding.getRoot(), itemSelectedListener));
 			}
 			else {
 				viewModel.update(itemIndex, symbol);

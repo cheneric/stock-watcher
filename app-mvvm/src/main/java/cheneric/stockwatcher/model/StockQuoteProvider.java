@@ -30,9 +30,20 @@ public class StockQuoteProvider implements Observer<StockQuote> {
 	}
 
 	public Observable<StockQuote> getStockQuote(String symbol) {
+		return getStockQuote(symbol, false);
+	}
+
+	public Observable<StockQuote> updateStockQuote(String symbol) {
+		return getStockQuote(symbol, true);
+	}
+
+	Observable<StockQuote> getStockQuote(String symbol, boolean isForceUpdate) {
 		final StockQuote cachedStockQuote = getCachedStockQuote(symbol);
 		Observable<StockQuote> stockQuoteObservable = createObservable(symbol);
-		if (cachedStockQuote == null) {
+		if (isForceUpdate || cachedStockQuote == null) {
+			if (isForceUpdate) {
+				Timber.v("forcing stock quote update: %s", symbol);
+			}
 			stockQuoteService.fetchStockQuote(symbol);
 		}
 		else {

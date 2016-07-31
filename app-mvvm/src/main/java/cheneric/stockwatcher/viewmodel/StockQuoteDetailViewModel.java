@@ -2,6 +2,7 @@ package cheneric.stockwatcher.viewmodel;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.view.View;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
@@ -14,6 +15,7 @@ import rx.schedulers.Schedulers;
 
 @AutoFactory
 public class StockQuoteDetailViewModel extends BaseObservable {
+	private static final long REFRESH_MILLIS = 2000;
 
 	// observed
 	private String changePercent;
@@ -25,11 +27,16 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	private final int itemIndex;
 	private final int stockListSize;
 	private final String symbol;
+	private final View rootView;
 
-	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, int stockListSize, String symbol) {
+	private final StockQuoteProvider stockQuoteProvider;
+
+	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, int stockListSize, String symbol, View rootView) {
+		this.stockQuoteProvider = stockQuoteProvider;
 		this.itemIndex = itemIndex;
 		this.stockListSize = stockListSize;
 		this.symbol = symbol;
+		this.rootView = rootView;
 		stockQuoteProvider.getStockQuote(symbol)
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
@@ -81,5 +88,16 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 		setPrice(stockQuote.getPrice());
 		setChangePercent(stockQuote.getChangePercent());
 		setIsPriceGain(stockQuote.isPriceGain());
+		autoRefresh();
+	}
+
+	void autoRefresh() {
+		rootView.postDelayed(() -> {
+				final String symbol = this.symbol;
+				if (rootView.isShown() && symbol != null) {
+					stockQuoteProvider.updateStockQuote(symbol);
+				}
+			},
+			REFRESH_MILLIS);
 	}
 }
