@@ -13,10 +13,11 @@ import rx.observables.SyncOnSubscribe;
 @ToString(of = "map")
 public class LinkedSet<T> {
 	private final LinkedMap<T,T> map = new LinkedMap<>();
-	private final Object lock = map;
+	private final Object mapLock = map;
 
 	@Getter
 	private final Observable<T> observable = createObservable();
+	private final Object observableLock = observable;
 
 	/**
 	 * Adds the element.
@@ -27,9 +28,11 @@ public class LinkedSet<T> {
 	 */
 	public boolean add(T element) {
 		boolean isNew;
-		synchronized(lock) {
+		synchronized(mapLock) {
 			isNew = rawAdd(element);
-			lock.notifyAll();
+		}
+		synchronized(observableLock) {
+			observableLock.notifyAll();
 		}
 		return isNew;
 	}
@@ -48,7 +51,7 @@ public class LinkedSet<T> {
 	 * re-inserts elements with the current timestamp.
 	 */
 	public boolean addAll(Collection<? extends T> elements) {
-		synchronized(lock) {
+		synchronized(mapLock) {
 			for (final T element : elements) {
 				 rawAdd(element);
 			}
@@ -63,7 +66,7 @@ public class LinkedSet<T> {
 	 * @return <code>true</code> if the element is in the set; <code>false</code> otherwise.
 	 */
 	public boolean contains(T element) {
-		synchronized(lock) {
+		synchronized(mapLock) {
 			return map.containsKey(element);
 		}
 	}
@@ -74,7 +77,7 @@ public class LinkedSet<T> {
 	 * @return the last element, or <code>null</code> if the set is empty.
 	 */
 	public T pollLast() {
-		synchronized(lock) {
+		synchronized(mapLock) {
 			return map.isEmpty() ?
 				null :
 				map.remove(map.lastKey());
@@ -88,7 +91,7 @@ public class LinkedSet<T> {
 	 * @return <code>true</code> if set contained the element; <code>false</code> if not.
 	 */
 	public boolean remove(T element) {
-		synchronized(lock) {
+		synchronized(mapLock) {
 			return map.remove(element) != null;
 		}
 	}
@@ -99,7 +102,7 @@ public class LinkedSet<T> {
 	 * @return the size of the set.
 	 */
 	public int size() {
-		synchronized(lock) {
+		synchronized(mapLock) {
 			return map.size();
 		}
 	}
@@ -114,8 +117,8 @@ public class LinkedSet<T> {
 				T element;
 				while ((element = pollLast()) == null) {
 					try {
-						synchronized (lock) {
-							lock.wait();
+						synchronized(observableLock) {
+							observableLock.wait();
 						}
 					}
 					catch (InterruptedException exception) {}
