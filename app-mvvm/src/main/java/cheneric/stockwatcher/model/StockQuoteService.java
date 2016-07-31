@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import cheneric.stockwatcher.inject.scope.ApplicationScope;
-import cheneric.stockwatcher.util.OrderedConcurrentNavigableSet;
+import cheneric.stockwatcher.util.LinkedSet;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -28,7 +28,7 @@ import timber.log.Timber;
  */
 @ApplicationScope
 public class StockQuoteService extends Observable<StockQuote> {
-	private final OrderedConcurrentNavigableSet<String> pendingQuoteSymbols;
+	private final LinkedSet<String> pendingQuoteSymbols;
 
 	@Inject
 	StockQuoteService(OnSubscribe onSubscribe) {
@@ -46,7 +46,7 @@ public class StockQuoteService extends Observable<StockQuote> {
 		private final long MAX_BATCH_MILLIS = 50;
 		private final int MAX_BATCH_SIZE = 20;
 		private final Subject<StockQuote,StockQuote> stockQuotePublishSubject = PublishSubject.create();
-		final OrderedConcurrentNavigableSet<String> pendingQuoteSymbols = new OrderedConcurrentNavigableSet<String>();
+		final LinkedSet<String> pendingQuoteSymbols = new LinkedSet<>();
 
 		@Inject
 		RawStockQuoteService rawStockQuoteService;

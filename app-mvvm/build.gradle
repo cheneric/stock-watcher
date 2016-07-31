@@ -70,6 +70,7 @@ android {
 		compile "com.squareup.retrofit2:converter-gson:${RETROFIT_VERSION}"
 		compile 'io.reactivex:rxandroid:1.2.1'
 		compile 'io.reactivex:rxjava:1.1.6'
+		compile 'org.apache.commons:commons-collections4:4.1'
 		provided 'com.google.guava:guava:19.0'
 		provided LOMBOK
 		testCompile 'junit:junit:4.12'

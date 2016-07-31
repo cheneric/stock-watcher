@@ -112,12 +112,12 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 
 	void autoRefresh() {
 		rootView.postDelayed(() -> {
-			final String symbol = this.symbol;
-			if (rootView.isShown() && symbol != null) {
-				stockQuoteProvider.updateStockQuote(symbol);
-			}
-		},
-		REFRESH_MILLIS);
+				final String symbol = this.symbol;
+				if (symbol != null) {
+					stockQuoteProvider.updateStockQuote(symbol);
+				}
+			},
+			REFRESH_MILLIS);
 	}
 
 	public void onItemSelected(View view) {

@@ -92,12 +92,8 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	}
 
 	void autoRefresh() {
-		rootView.postDelayed(() -> {
-				final String symbol = this.symbol;
-				if (rootView.isShown() && symbol != null) {
-					stockQuoteProvider.updateStockQuote(symbol);
-				}
-			},
+		rootView.postDelayed(
+			() -> stockQuoteProvider.updateStockQuote(symbol),
 			REFRESH_MILLIS);
 	}
 }
