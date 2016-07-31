@@ -48,6 +48,12 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 	}
 
 	@Override
+	public void onViewRecycled(ViewHolder viewHolder) {
+		super.onViewRecycled(viewHolder);
+		viewHolder.recycle();
+	}
+
+	@Override
 	public int getItemCount() {
 		return stockSymbolList.size();
 	}
@@ -78,6 +84,11 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 			else {
 				viewModel.update(itemIndex, symbol);
 			}
+		}
+
+		void recycle() {
+			binding.getViewModel()
+				.recycle();
 		}
 	}
 }

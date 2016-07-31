@@ -67,17 +67,19 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 		notifyPropertyChanged(BR.symbol);
 	}
 
-	public void update(int itemIndex, String symbol) {
-		setItemIndex(itemIndex);
-		setSymbol(symbol);
-		// reset recycled views
+	public void recycle() {
 		update(null);
-		Subscription subscription = this.subscription;
+		final Subscription subscription = this.subscription;
 		if (subscription != null) {
 			Timber.v("unsubscribing: %s", subscription);
 			subscription.unsubscribe();
 		}
-		this.subscription = subscription = stockQuoteProvider.getStockQuote(symbol)
+	}
+
+	public void update(int itemIndex, String symbol) {
+		setItemIndex(itemIndex);
+		setSymbol(symbol);
+		this.subscription = stockQuoteProvider.getStockQuote(symbol)
 			.subscribeOn(Schedulers.io())
 			.subscribe(new Observer<StockQuote>() {
 				@Override
@@ -95,7 +97,7 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 
 	void update(StockQuote stockQuote) {
 		if (stockQuote == null) {
-			Timber.d("recycling stock detail list item (%s)", itemIndex);
+			Timber.d("recycling stock detail list item (%s): %s", itemIndex, symbol);
 		}
 		else {
 			Timber.d("updating stock detail list item (%s): %s", itemIndex, stockQuote);
