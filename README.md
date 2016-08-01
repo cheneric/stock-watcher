@@ -47,7 +47,7 @@ Stock quotes are stored in an in-memory cache.  The ViewModel layer makes all re
   
 ## 3. Screenshots
 
-[<img src="./screenshots/stock_list.png" width="200px"/>](screenshots/stock_list.png)
+[<img src="./screenshots/stock_list.gif" width="200px"/>](screenshots/stock_list.gif)
 [<img src="./screenshots/stock_add.png" width="200px"/>](screenshots/stock_add.png)
 [<img src="./screenshots/stock_detail_portrait.png" width="200px"/>](screenshots/stock_detail_portrait.png)
 [<img src="./screenshots/stock_detail_landscape.png" height="200px"/>](screenshots/stock_detail_landscape.png)
