@@ -6,12 +6,13 @@ import cheneric.stockwatcher.inject.dagger2.BaseComponentManager;
 
 public class ComponentManager extends BaseComponentManager {
 
-	public ComponentManager(Application application) {
-		createComponent(ApplicationComponent.class, this::createApplicationComponent);
+	public ComponentManager(final Application application) {
+		createComponent(ApplicationComponent.class, () -> { return createApplicationComponent(application); });
 	}
 
-	ApplicationComponent createApplicationComponent() {
+	ApplicationComponent createApplicationComponent(Application application) {
 		return DaggerApplicationComponent.builder()
+			.module(new ApplicationComponent.Module(application))
 			.build();
 	}
 

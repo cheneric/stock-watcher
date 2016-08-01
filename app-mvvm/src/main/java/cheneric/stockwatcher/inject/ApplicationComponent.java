@@ -1,10 +1,15 @@
 package cheneric.stockwatcher.inject;
 
+import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+
 import java.io.IOException;
 
 import cheneric.stockwatcher.StockWatcherApplication;
 import cheneric.stockwatcher.inject.dagger2.Component;
 import cheneric.stockwatcher.inject.scope.ApplicationScope;
+import cheneric.stockwatcher.model.Preferences;
 import cheneric.stockwatcher.model.StockQuoteProvider;
 import cheneric.stockwatcher.model.StockQuoteService.RawStockQuoteService;
 import cheneric.stockwatcher.model.StockSymbolList;
@@ -17,11 +22,18 @@ public interface ApplicationComponent extends Component {
 
 	void inject(StockWatcherApplication application);
 
+	Preferences preferences();
 	StockQuoteProvider stockQuoteProvider();
 	StockSymbolList stockSymbolList();
 
 	@dagger.Module
 	static class Module {
+		private final Context context;
+
+		Module(Application application) {
+			this.context = application;
+		}
+
 		@Provides
 		@ApplicationScope
 		StockSymbolList provideStockSymbolList() {
@@ -40,6 +52,11 @@ public interface ApplicationComponent extends Component {
 		RawStockQuoteService provideRawStockQuoteService() {
 			return new RawStockQuoteService.Factory()
 				.create();
+		}
+
+		@Provides
+		ConnectivityManager provideConnectivityManager() {
+			return (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		}
 	}
 }

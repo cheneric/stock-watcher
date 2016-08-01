@@ -8,6 +8,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 
 import cheneric.stockwatcher.BR;
+import cheneric.stockwatcher.model.Preferences;
 import cheneric.stockwatcher.model.StockQuote;
 import cheneric.stockwatcher.model.StockQuoteProvider;
 import cheneric.stockwatcher.view.StockQuoteListFragment;
@@ -30,6 +31,7 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	private String symbol;
 
 	// unobserved
+	private final Preferences preferences;
 	private final StockQuoteListFragment.ItemSelectedListener itemSelectedListener;
 	private final StockQuoteProvider stockQuoteProvider;
 
@@ -41,9 +43,9 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	private Subscription lifecycleSubscription;
 	private Subscription stockQuoteSubscription;
 
-
-	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
+	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, @Provided Preferences preferences, int itemIndex, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 		this.stockQuoteProvider = stockQuoteProvider;
+		this.preferences = preferences;
 		this.rootView = rootView;
 		this.itemSelectedListener = itemSelectedListener;
 		update(itemIndex, symbol);
@@ -149,14 +151,19 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	}
 
 	void startAutoRefresh() {
-		if (isAutoRefreshEnabled && symbol != null) {
-			rootView.postDelayed(() -> {
-					final String symbol = this.symbol;
-					if (symbol != null) {
-						stockQuoteProvider.updateStockQuote(symbol);
-					}
-				},
-				REFRESH_MILLIS);
+		if (preferences.isAutoRefreshEnabled()) {
+			if (isAutoRefreshEnabled && symbol != null) {
+				rootView.postDelayed(() -> {
+						final String symbol = this.symbol;
+						if (symbol != null) {
+							stockQuoteProvider.updateStockQuote(symbol);
+						}
+					},
+					REFRESH_MILLIS);
+			}
+		}
+		else {
+			Timber.d("auto refresh disabled by preferences");
 		}
 	}
 

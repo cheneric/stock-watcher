@@ -8,6 +8,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 
 import cheneric.stockwatcher.BR;
+import cheneric.stockwatcher.model.Preferences;
 import cheneric.stockwatcher.model.StockQuote;
 import cheneric.stockwatcher.model.StockQuoteProvider;
 import cheneric.stockwatcher.view.util.Lifecycle;
@@ -29,6 +30,7 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	private String price;
 
 	// unobserved
+	private final Preferences preferences;
 	private final StockQuoteProvider stockQuoteProvider;
 	private final CompositeSubscription subscriptions = new CompositeSubscription();
 
@@ -39,8 +41,9 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	private final int stockListSize;
 	private final String symbol;
 
-	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, int stockListSize, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable) {
+	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, @Provided Preferences preferences, int itemIndex, int stockListSize, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable) {
 		this.stockQuoteProvider = stockQuoteProvider;
+		this.preferences = preferences;
 		this.itemIndex = itemIndex;
 		this.stockListSize = stockListSize;
 		this.symbol = symbol;
@@ -128,10 +131,15 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	}
 
 	void startAutoRefresh() {
-		if (isAutoRefreshEnabled) {
-			rootView.postDelayed(
-				() -> stockQuoteProvider.updateStockQuote(symbol),
-				REFRESH_MILLIS);
+		if (preferences.isAutoRefreshEnabled()) {
+			if (isAutoRefreshEnabled) {
+				rootView.postDelayed(
+					() -> stockQuoteProvider.updateStockQuote(symbol),
+					REFRESH_MILLIS);
+			}
+		}
+		else {
+			Timber.d("auto refresh disabled by preferences");
 		}
 	}
 }
