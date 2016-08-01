@@ -4,7 +4,7 @@
 
 0. [Overview](#1-overview)
 0. [Features](#2-features)
-  0. [Realtime stock quote updates](#i-realtime-stock-quote-updates)
+  0. [Real-time stock quote updates](#i-real-time-stock-quote-updates)
   0. [Deduplicated last-in, first-out (LIFO) request buffering](#ii-deduplicated-last-in-first-out-lifo-request-buffering)
   0. [Read-through cache](#iii-read-through-cache)
 0. [Screenshots](#3-screenshots)
@@ -31,7 +31,7 @@ Demo Android stock watchlist app that demonstrates the following technologies:
 
 ## 2. Features
 
-### i. Realtime stock quote updates
+### i. Real-time stock quote updates
 
 Updated every 2 seconds on both the [list](app-mvvm/src/main/java/cheneric/stockwatcher/viewmodel/StockQuoteListItemViewModel.java#L153) and [detail](app-mvvm/src/main/java/cheneric/stockwatcher/viewmodel/StockQuoteDetailViewModel.java#L133) screens if connected to wifi.
 
