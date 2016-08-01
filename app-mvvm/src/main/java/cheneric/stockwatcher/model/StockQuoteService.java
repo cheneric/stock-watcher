@@ -3,7 +3,10 @@ package cheneric.stockwatcher.model;
 import android.text.TextUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -69,16 +72,16 @@ public class StockQuoteService extends Observable<StockQuote> {
 
 		List<StockQuote> getStockQuotes(List<String> symbols) {
 			try {
-				// workaround for Yahoo service returning a single result as an object instead of a list
-				if (symbols.size() == 1) {
-					symbols.add("GOOGL".equals(symbols.get(0)) ? "GOOG" : "GOOGL");
+				final Set<String> requestSymbols = new HashSet<>(symbols);
+				if (requestSymbols.size() == 1) {
+					requestSymbols.add(requestSymbols.contains("GOOGL") ? "GOOG" : "GOOGL");
 				}
 
-				Timber.d("fetching %s stock quotes", symbols.size());
-				Timber.v("fetching symbols: %s", symbols);
+				Timber.d("fetching %s stock quotes", requestSymbols.size());
+				Timber.v("fetching symbols: %s", requestSymbols);
 				final String query =
 					"SELECT Symbol, Name, LastTradePriceOnly, ChangeinPercent FROM yahoo.finance.quotes WHERE symbol IN (\""
-						+ TextUtils.join("\", \"", symbols)
+						+ TextUtils.join("\", \"", requestSymbols)
 						+ "\")";
 				final Response<StockQuoteResult> stockQuotesResponse =
 					rawStockQuoteService.getStockQuotes(query)
@@ -92,8 +95,10 @@ public class StockQuoteService extends Observable<StockQuote> {
 				return stockQuotes;
 			}
 			catch (IOException exception) {
-				throw new RuntimeException(exception);
+				Timber.w(exception, "adding symbols back to requests queue: %s", symbols);
+				pendingQuoteSymbols.addAll(symbols);
 			}
+			return Arrays.asList();
 		}
 	}
 
