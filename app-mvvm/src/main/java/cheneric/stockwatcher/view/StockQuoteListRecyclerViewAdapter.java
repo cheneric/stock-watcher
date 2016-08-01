@@ -13,8 +13,10 @@ import cheneric.stockwatcher.StockWatcherApplication;
 import cheneric.stockwatcher.databinding.StockQuoteListItemBinding;
 import cheneric.stockwatcher.model.StockSymbolList;
 import cheneric.stockwatcher.view.StockQuoteListFragment.ItemSelectedListener;
+import cheneric.stockwatcher.view.util.Lifecycle;
 import cheneric.stockwatcher.viewmodel.StockQuoteListItemViewModel;
 import cheneric.stockwatcher.viewmodel.StockQuoteListItemViewModelFactory;
+import rx.Observable;
 
 /**
  * {@link StockSymbolList} {@link RecyclerView.Adapter} that passes user interactions to
@@ -24,10 +26,12 @@ import cheneric.stockwatcher.viewmodel.StockQuoteListItemViewModelFactory;
 public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<StockQuoteListRecyclerViewAdapter.ViewHolder> {
 
 	private final ItemSelectedListener itemSelectedListener;
+	private final Observable<Lifecycle> lifecycleObservable;
 	private final StockSymbolList stockSymbolList;
 
-	StockQuoteListRecyclerViewAdapter(@Provided StockSymbolList stockSymbolList, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
+	StockQuoteListRecyclerViewAdapter(@Provided StockSymbolList stockSymbolList, Observable<Lifecycle> lifecycleObservable, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 		this.stockSymbolList = stockSymbolList;
+		this.lifecycleObservable = lifecycleObservable;
 		this.itemSelectedListener = itemSelectedListener;
 	}
 
@@ -39,7 +43,7 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 					parent.getContext()),
 					parent,
 					false);
-		return new ViewHolder(binding);
+		return new ViewHolder(binding, lifecycleObservable);
 	}
 
 	@Override
@@ -60,13 +64,15 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 		private final StockQuoteListItemBinding binding;
+		private final Observable<Lifecycle> lifecycleObservable;
 
 		@Inject
 		StockQuoteListItemViewModelFactory viewModelFactory;
 
-		public ViewHolder(StockQuoteListItemBinding binding) {
+		public ViewHolder(StockQuoteListItemBinding binding, Observable<Lifecycle> lifecycleObservable) {
 			super(binding.getRoot());
 			this.binding = binding;
+			this.lifecycleObservable = lifecycleObservable;
 			// inject
 			((StockWatcherApplication)binding.getRoot()
 				.getContext()
@@ -79,7 +85,7 @@ public class StockQuoteListRecyclerViewAdapter extends RecyclerView.Adapter<Stoc
 		void bind(int itemIndex, String symbol, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 			final StockQuoteListItemViewModel viewModel = binding.getViewModel();
 			if (viewModel == null) {
-				binding.setViewModel(viewModelFactory.create(itemIndex, symbol, binding.getRoot(), itemSelectedListener));
+				binding.setViewModel(viewModelFactory.create(itemIndex, symbol, binding.getRoot(), lifecycleObservable, itemSelectedListener));
 			}
 			else {
 				viewModel.update(itemIndex, symbol);

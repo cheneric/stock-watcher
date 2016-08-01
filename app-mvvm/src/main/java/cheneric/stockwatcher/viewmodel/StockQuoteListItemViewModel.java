@@ -11,9 +11,12 @@ import cheneric.stockwatcher.BR;
 import cheneric.stockwatcher.model.StockQuote;
 import cheneric.stockwatcher.model.StockQuoteProvider;
 import cheneric.stockwatcher.view.StockQuoteListFragment;
+import cheneric.stockwatcher.view.util.Lifecycle;
 import lombok.Setter;
+import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -27,19 +30,44 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	private String symbol;
 
 	// unobserved
+	private final StockQuoteListFragment.ItemSelectedListener itemSelectedListener;
+	private final StockQuoteProvider stockQuoteProvider;
+
 	@Setter
 	private int itemIndex = -1;
+
+	private boolean isAutoRefreshEnabled = true;
 	private View rootView;
-	private Subscription subscription;
+	private Subscription lifecycleSubscription;
+	private Subscription stockQuoteSubscription;
 
-	private final StockQuoteProvider stockQuoteProvider;
-	private final StockQuoteListFragment.ItemSelectedListener itemSelectedListener;
 
-	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, String symbol, View rootView, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
+	public StockQuoteListItemViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable, StockQuoteListFragment.ItemSelectedListener itemSelectedListener) {
 		this.stockQuoteProvider = stockQuoteProvider;
 		this.rootView = rootView;
 		this.itemSelectedListener = itemSelectedListener;
 		update(itemIndex, symbol);
+		lifecycleSubscription =
+			lifecycleObservable.subscribeOn(AndroidSchedulers.mainThread())
+				.subscribe(lifecycle -> {
+					switch(lifecycle) {
+						case start:
+							enableAutoRefresh();
+							startAutoRefresh();
+							break;
+						case stop:
+							disableAutoRefresh();
+							break;
+						case detach:
+							if (stockQuoteSubscription != null) {
+								Timber.v("on detach unsubscribing (%s): symbol %s, subscription %s", itemIndex, symbol, stockQuoteSubscription);
+								stockQuoteSubscription.unsubscribe();
+							}
+							Timber.v("on detach unsubscribing (%s): symbol %s, subscription %s", itemIndex, symbol, lifecycleSubscription);
+							lifecycleSubscription.unsubscribe();
+							break;
+					}
+				});
 	}
 
 	@Bindable
@@ -72,9 +100,9 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 
 	public void recycle() {
 		update(null);
-		final Subscription subscription = this.subscription;
+		final Subscription subscription = this.stockQuoteSubscription;
 		if (subscription != null) {
-			Timber.v("unsubscribing: %s", subscription);
+			Timber.v("on recycle unsubscribing (%s): symbol %s, subscription %s", itemIndex, symbol, lifecycleSubscription);
 			subscription.unsubscribe();
 		}
 	}
@@ -82,7 +110,7 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 	public void update(int itemIndex, String symbol) {
 		setItemIndex(itemIndex);
 		setSymbol(symbol);
-		this.subscription = stockQuoteProvider.getStockQuote(symbol)
+		this.stockQuoteSubscription = stockQuoteProvider.getStockQuote(symbol)
 			.subscribeOn(Schedulers.io())
 			.subscribe(new Observer<StockQuote>() {
 				@Override
@@ -90,7 +118,7 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 
 				@Override
 				public void onError(Throwable throwable) {
-					Timber.e(throwable, "error updating stock quote list detail item");
+					Timber.e(throwable, "error updating stock quote list item (%s): %s", itemIndex, symbol);
 				}
 
 				@Override
@@ -100,24 +128,36 @@ public class StockQuoteListItemViewModel extends BaseObservable {
 
 	void update(StockQuote stockQuote) {
 		if (stockQuote == null) {
-			Timber.d("recycling stock detail list item (%s): %s", itemIndex, symbol);
+			Timber.d("recycling stock list item (%s): %s", itemIndex, symbol);
 		}
 		else {
-			Timber.d("updating stock detail list item (%s): %s", itemIndex, stockQuote);
+			Timber.d("updating stock list item (%s): %s", itemIndex, stockQuote);
 		}
 		setPrice(stockQuote == null ? null : stockQuote.getPrice());
 		setIsPriceGain(stockQuote == null ? null : stockQuote.isPriceGain());
-		autoRefresh();
+		startAutoRefresh();
 	}
 
-	void autoRefresh() {
-		rootView.postDelayed(() -> {
-				final String symbol = this.symbol;
-				if (symbol != null) {
-					stockQuoteProvider.updateStockQuote(symbol);
-				}
-			},
-			REFRESH_MILLIS);
+	void disableAutoRefresh() {
+		Timber.d("disabling auto refresh (%s): %s", itemIndex, symbol);
+		isAutoRefreshEnabled = false;
+	}
+
+	void enableAutoRefresh() {
+		Timber.d("enabling auto refresh (%s): %s", itemIndex, symbol);
+		isAutoRefreshEnabled = true;
+	}
+
+	void startAutoRefresh() {
+		if (isAutoRefreshEnabled && symbol != null) {
+			rootView.postDelayed(() -> {
+					final String symbol = this.symbol;
+					if (symbol != null) {
+						stockQuoteProvider.updateStockQuote(symbol);
+					}
+				},
+				REFRESH_MILLIS);
+		}
 	}
 
 	public void onItemSelected(View view) {

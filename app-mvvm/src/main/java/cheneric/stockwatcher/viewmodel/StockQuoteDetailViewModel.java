@@ -10,8 +10,13 @@ import com.google.auto.factory.Provided;
 import cheneric.stockwatcher.BR;
 import cheneric.stockwatcher.model.StockQuote;
 import cheneric.stockwatcher.model.StockQuoteProvider;
+import cheneric.stockwatcher.view.util.Lifecycle;
+import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 @AutoFactory
 public class StockQuoteDetailViewModel extends BaseObservable {
@@ -24,23 +29,44 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 	private String price;
 
 	// unobserved
+	private final StockQuoteProvider stockQuoteProvider;
+	private final CompositeSubscription subscriptions = new CompositeSubscription();
+
 	private final int itemIndex;
+	private boolean isAutoRefreshEnabled = true;
+	private Subscription lifecycleSubscription;
+	private final View rootView;
 	private final int stockListSize;
 	private final String symbol;
-	private final View rootView;
 
-	private final StockQuoteProvider stockQuoteProvider;
-
-	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, int stockListSize, String symbol, View rootView) {
+	public StockQuoteDetailViewModel(@Provided StockQuoteProvider stockQuoteProvider, int itemIndex, int stockListSize, String symbol, View rootView, Observable<Lifecycle> lifecycleObservable) {
 		this.stockQuoteProvider = stockQuoteProvider;
 		this.itemIndex = itemIndex;
 		this.stockListSize = stockListSize;
 		this.symbol = symbol;
 		this.rootView = rootView;
-		stockQuoteProvider.getStockQuote(symbol)
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribe(stockQuote -> update(stockQuote));
+		subscriptions.add(
+			stockQuoteProvider.getStockQuote(symbol)
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(stockQuote -> update(stockQuote)));
+		subscriptions.add(
+			lifecycleObservable.subscribeOn(AndroidSchedulers.mainThread())
+				.subscribe(lifecycle -> {
+					switch(lifecycle) {
+						case start:
+							enableAutoRefresh();
+							startAutoRefresh();
+							break;
+						case stop:
+							disableAutoRefresh();
+							break;
+						case detach:
+							Timber.v("ondetach unbsubscribing subscriptions: %s", symbol);
+							subscriptions.unsubscribe();
+							break;
+					}
+				}));
 	}
 
 	@Bindable
@@ -88,12 +114,24 @@ public class StockQuoteDetailViewModel extends BaseObservable {
 		setPrice(stockQuote.getPrice());
 		setChangePercent(stockQuote.getChangePercent());
 		setIsPriceGain(stockQuote.isPriceGain());
-		autoRefresh();
+		startAutoRefresh();
 	}
 
-	void autoRefresh() {
-		rootView.postDelayed(
-			() -> stockQuoteProvider.updateStockQuote(symbol),
-			REFRESH_MILLIS);
+	void disableAutoRefresh() {
+		Timber.d("disabling auto refresh: %s", symbol);
+		isAutoRefreshEnabled = false;
+	}
+
+	void enableAutoRefresh() {
+		Timber.d("enabling auto refresh: %s", symbol);
+		isAutoRefreshEnabled = true;
+	}
+
+	void startAutoRefresh() {
+		if (isAutoRefreshEnabled) {
+			rootView.postDelayed(
+				() -> stockQuoteProvider.updateStockQuote(symbol),
+				REFRESH_MILLIS);
+		}
 	}
 }

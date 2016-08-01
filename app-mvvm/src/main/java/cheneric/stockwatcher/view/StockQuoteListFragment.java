@@ -21,9 +21,12 @@ import cheneric.stockwatcher.StockWatcherApplication;
 import cheneric.stockwatcher.databinding.StockQuoteListFragmentBinding;
 import cheneric.stockwatcher.inject.ComponentManager;
 import cheneric.stockwatcher.inject.StockQuoteListComponent;
+import cheneric.stockwatcher.view.util.Lifecycle;
 import cheneric.stockwatcher.view.widget.DividerItemDecoration;
 import cheneric.stockwatcher.viewmodel.StockQuoteListViewModel;
 import lombok.NoArgsConstructor;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 import timber.log.Timber;
 
 /**
@@ -38,6 +41,7 @@ public class StockQuoteListFragment extends Fragment {
 	private static final String COLUMN_COUNT_ARG_KEY = "COLUMN_COUNT";
 	private static final int SCROLL_TO_TOP_OFFSET_PIXELS = 100;
 
+	private final Subject<Lifecycle,Lifecycle> lifecycleSubject = PublishSubject.create();
 	private int columnCount = 1;
 	private ComponentManager componentManager;
 	private ItemSelectedListener itemSelectedListener;
@@ -96,30 +100,49 @@ public class StockQuoteListFragment extends Fragment {
 			layoutManager = new GridLayoutManager(context, columnCount);
 		}
 		recyclerView.setLayoutManager(layoutManager);
-		recyclerView.setAdapter(stockQuoteListRecyclerViewAdapterFactory.create(itemSelectedListener));
+		recyclerView.setAdapter(stockQuoteListRecyclerViewAdapterFactory.create(lifecycleSubject, itemSelectedListener));
 		return rootView;
 	}
 
+	@Override
+	public void onStart() {
+		final Lifecycle lifecycle = Lifecycle.start;
+		Timber.d("lifecycle: %s", lifecycle);
+		super.onStart();
+		lifecycleSubject.onNext(lifecycle);
+	}
+
+	@Override
+	public void onStop() {
+		final Lifecycle lifecycle = Lifecycle.stop;
+		Timber.d("lifecycle: %s", lifecycle);
+		super.onStop();
+		lifecycleSubject.onNext(lifecycle);
+	}
+
+	@Override
+	public void onDetach() {
+		final Lifecycle lifecycle = Lifecycle.detach;
+		Timber.d("lifecycle: %s", lifecycle);
+		super.onDetach();
+		lifecycleSubject.onNext(lifecycle);
+		componentManager.destroyComponent(StockQuoteListComponent.class);
+		itemSelectedListener = null;
+	}
+
 	public void smoothScrollToPosition(int position) {
-		Timber.d("stock quote list smooth scrolling to index: %s", position);
+		Timber.d("smooth scrolling to index: %s", position);
 		recyclerView.smoothScrollToPosition(position);
 	}
 
 	public void scrollToPosition(int position) {
-		Timber.d("stock quote list scrolling to index: %s", position);
+		Timber.d("scrolling to index: %s", position);
 		if (layoutManager instanceof LinearLayoutManager) {
 			((LinearLayoutManager)layoutManager).scrollToPositionWithOffset(position, SCROLL_TO_TOP_OFFSET_PIXELS);
 		}
 		else {
 			layoutManager.scrollToPosition(position);
 		}
-	}
-
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		componentManager.destroyComponent(StockQuoteListComponent.class);
-		itemSelectedListener = null;
 	}
 
 	/**
