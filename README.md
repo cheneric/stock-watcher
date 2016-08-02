@@ -2,21 +2,28 @@
 
 ## Contents
 
-0. [Overview](#1-overview)
-0. [Features](#2-features)
+0. [Screenshots](#1-screenshots)
+0. [Overview](#2-overview)
+0. [Features](#3-features)
   0. [Real-time stock quote updates](#i-real-time-stock-quote-updates)
   0. [Deduplicated last-in, first-out (LIFO) request buffering](#ii-deduplicated-last-in-first-out-lifo-request-buffering)
   0. [Read-through cache](#iii-read-through-cache)
-0. [Screenshots](#3-screenshots)
 0. [Setup](#4-setup)
   0. [Android Studio](#i-android-studio)
   0. [Command-line](#ii-command-line)
     0. [Build](#a-build)
     0. [Test](#b-test)
     0. [Install](#c-install)
-0. [Development environment](#5-development-environment)
+0. [Environments](#5-environments)
 
-## 1. Overview
+## 1. Screenshots
+
+[<img src="./screenshots/stock_list.gif" width="200px"/>](screenshots/stock_list.gif)
+[<img src="./screenshots/stock_add.png" width="200px"/>](screenshots/stock_add.png)
+[<img src="./screenshots/stock_detail_portrait.png" width="200px"/>](screenshots/stock_detail_portrait.png)
+[<img src="./screenshots/stock_detail_landscape.png" height="200px"/>](screenshots/stock_detail_landscape.png)
+
+## 2. Overview
 
 Demo Android stock watchlist app that demonstrates the following technologies:
 
@@ -24,12 +31,12 @@ Demo Android stock watchlist app that demonstrates the following technologies:
   * [Butter Knife](http://jakewharton.github.io/butterknife/) (View and Listener binding)
   * [Dagger2](http://google.github.io/dagger/) (dependency injection)
   * [Data Binding](http://developer.android.com/topic/libraries/data-binding/index.html) (data binding to Views)
-  * [Project Lombok](http://projectlombok.org/features/index.html) (code generation via annotation processing)
+  * [Project Lombok](http://projectlombok.org/features/index.html) (boilerplate code generation)
   * [RxJava](//github.com/ReactiveX/RxJava/wiki)/[RxAndroid](//github.com/ReactiveX/RxAndroid/wiki) (reactive programming)
   * [Retrofit](http://square.github.io/retrofit/) (networking)
   * [Retrolambda](//github.com/evant/gradle-retrolambda) (Java8 lambdas and method references on Android)
 
-## 2. Features
+## 3. Features
 
 ### i. Real-time stock quote updates
 
@@ -45,13 +52,6 @@ Furthermore, stock quote requests are batched into [groups of 20 quotes or 50ms]
 
 Stock quotes are stored in an in-memory cache.  The ViewModel layer makes all requests to the [cache layer](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteProvider.java#L32), which either services this request from memory if its cache entry [is fresh](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteProvider.java#L70), or by [making a network request](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteService.java#L39) if not.
   
-## 3. Screenshots
-
-[<img src="./screenshots/stock_list.gif" width="200px"/>](screenshots/stock_list.gif)
-[<img src="./screenshots/stock_add.png" width="200px"/>](screenshots/stock_add.png)
-[<img src="./screenshots/stock_detail_portrait.png" width="200px"/>](screenshots/stock_detail_portrait.png)
-[<img src="./screenshots/stock_detail_landscape.png" height="200px"/>](screenshots/stock_detail_landscape.png)
-
 ## 4. Setup
 
 ### i. Android Studio
@@ -90,7 +90,7 @@ stock-watcher $ ./gradlew test
 stock-watcher $ adb install -r app-mvvm/build/outputs/apk/app-mvvm-debug.apk
 ```
 
-## 5. Development environment
+## 5. Environments
 
 This project was built using the following development environment:
 
