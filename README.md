@@ -46,7 +46,7 @@ Updated every 2 seconds on both the [list](app-mvvm/src/main/java/cheneric/stock
 
 Stock quote requests are buffered in a [LinkedSet](app-mvvm/src/main/java/cheneric/stockwatcher/util/LinkedSet.java) that consolidates duplicate requests and executes the most recent requests first.
 
-Furthermore, stock quote requests are batched into [groups of 20 quotes or 50ms](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteService.java#L58), whichever comes first.
+Furthermore, stock quote requests are batched into [groups of 20 quotes or 50ms](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteService.java#L61), whichever comes first.
 
 ### iii. Read-through cache
 
