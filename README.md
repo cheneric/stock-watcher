@@ -44,7 +44,7 @@ Updated every 2 seconds on both the [list](app-mvvm/src/main/java/cheneric/stock
 
 ### ii. Deduplicated last-in, first-out (LIFO) request buffering
 
-Stock quote requests are buffered in a [LinkedSet](app-mvvm/src/main/java/cheneric/stockwatcher/util/LinkedSet.java) that consilidates duplicate requests and executes the most recent requests first.
+Stock quote requests are buffered in a [LinkedSet](app-mvvm/src/main/java/cheneric/stockwatcher/util/LinkedSet.java) that consolidates duplicate requests and executes the most recent requests first.
 
 Furthermore, stock quote requests are batched into [groups of 20 quotes or 50ms](app-mvvm/src/main/java/cheneric/stockwatcher/model/StockQuoteService.java#L58), whichever comes first.
 
